@@ -1,0 +1,17 @@
+# Advisory PR review shared across repositories. CI remains in ci.yml.
+name: AI Code Review
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  review:
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository }}
+    uses: Helen869/shared-ai-review-workflows/.github/workflows/groq-review.yml@main
+    secrets:
+      GROQ__REVIEW_API_KEY: ${{ secrets.GROQ__REVIEW_API_KEY }}

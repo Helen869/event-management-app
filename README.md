@@ -69,6 +69,35 @@ flowchart TB
 
 Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+## Repository structure
+
+```text
+.github/workflows/ci.yml     CI: backend and frontend jobs
+backend/
+  app/
+    main.py                  App factory, request logging middleware
+    api/                     routes.py, schemas.py, errors.py (domain exception → HTTP)
+    domain/                  models.py, errors.py (domain exceptions)
+    service.py               All business rules
+    repository.py            In-memory storage and the lock
+  tests/
+    unit/                    Business rules and concurrency on the service
+    integration/             Status codes and schemas through TestClient
+  pyproject.toml             Ruff, pytest and coverage config
+  requirements*.txt          Runtime and dev dependencies
+frontend/
+  src/
+    pages/                   EventList, EventForm, EventDetails
+    api.ts                   Typed fetch client for /api
+    router.ts, hooks.ts      Hash router; useLoad and useSubmit
+    components.tsx, notifications.tsx, dates.ts, text.ts
+    App.tsx, main.tsx, styles.css
+  vite.config.ts             Dev proxy /api → :8000
+docs/                        Architecture, API spec, decisions
+```
+
+Each module's responsibility: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#layer-responsibilities).
+
 ## Quick start
 
 ### Prerequisites

@@ -171,6 +171,13 @@ def test_cannot_cancel_registration_for_past_event(service, event_id, clock):
     assert emails(service, event_id) == ["alice@example.com"]
 
 
+def test_attendees_of_started_event_can_still_be_listed(service, event_id, clock):
+    service.register(event_id, "alice@example.com")
+    clock.advance(days=1)
+
+    assert emails(service, event_id) == ["alice@example.com"]
+
+
 def test_past_event_is_reported_before_missing_registration_on_cancel(service, event_id, clock):
     clock.advance(days=1)
 

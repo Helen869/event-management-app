@@ -205,7 +205,7 @@ The two jobs run in parallel and any failing step fails its job. The integration
 | 9 | Capacity not below registrations | `test_cannot_reduce_capacity_below_registrations`, `test_capacity_can_be_reduced_to_exactly_current_registrations` | `test_reducing_capacity_below_registrations_returns_409` |
 | 10 | Cancel unknown registration → 404 | `test_cancelling_unregistered_email_is_not_found` | `test_unregister_unknown_email_returns_404` |
 | 11 | Concurrency never exceeds capacity | `test_concurrent_registrations_never_exceed_capacity` | – |
-| 12 | Started events frozen | `test_cannot_update_past_event`, `test_cannot_cancel_registration_for_past_event`, `test_event_becomes_past_once_its_start_time_is_reached` | `test_updating_past_event_returns_409`, `test_unregister_for_past_event_returns_409` |
+| 12 | Started events frozen | `test_cannot_update_past_event`, `test_cannot_cancel_registration_for_past_event`, `test_event_becomes_past_once_its_start_time_is_reached`, `test_attendees_of_started_event_can_still_be_listed` | `test_updating_past_event_returns_409`, `test_unregister_for_past_event_returns_409` |
 | 13 | Boundaries (exactly full, start = now, capacity = count) | `test_last_seat_can_be_taken`, `test_cannot_register_when_start_time_equals_now`, `test_cannot_create_event_starting_exactly_now`, `test_capacity_can_be_reduced_to_exactly_current_registrations` | `test_max_capacity_upper_bound_is_accepted` |
 | – | Rule evaluation order | `test_duplicate_is_reported_before_full_when_both_apply`, `test_past_event_is_reported_before_missing_registration_on_cancel`, `test_past_event_rejection_takes_precedence_over_invalid_new_date`, `test_past_new_date_is_reported_before_capacity_conflict` | – |
 

@@ -202,6 +202,8 @@ Two jobs run in parallel: **Backend** (lint, unit tests, integration tests, cove
 - backend coverage below 80% (line + branch)
 - frontend type-check or build failure
 
+**Branch protection:** a repository ruleset on `main` requires a pull request and both checks, **Backend (lint, tests, coverage)** and **Frontend (type check, build)**, to pass on a branch that is up to date with `main`. Direct pushes and force pushes are blocked. Required approvals are 0 because there is a single contributor, and the owner configured no bypass. All changes go through `feat/…`, `fix/…` or `docs/…` branches.
+
 **Viewing results:** open the repository's **Actions** tab and select a run of **CI**. Each step's log is shown per job.
 JUnit XML and coverage reports (XML + HTML) are attached as the `backend-reports` artifact on the run's summary page.
 

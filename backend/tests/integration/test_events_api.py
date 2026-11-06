@@ -86,6 +86,13 @@ def test_missing_required_fields_are_listed(client):
     assert fields == {"title", "starts_at", "max_capacity"}
 
 
+def test_start_time_must_be_an_iso_string_not_a_unix_timestamp(client):
+    response = client.post("/api/events", json=EVENT | {"starts_at": 1801000000})
+
+    assert response.status_code == 422
+    assert response.json()["details"][0]["field"] == "starts_at"
+
+
 def test_max_capacity_upper_bound_is_accepted(client):
     assert create_event(client, max_capacity=100_000)["max_capacity"] == 100_000
 

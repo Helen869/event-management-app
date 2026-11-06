@@ -7,7 +7,7 @@ This page summarizes it and adds the business constraints that OpenAPI cannot ex
 ## Conventions
 
 - Base path: `/api`. JSON bodies, `snake_case` fields.
-- Datetimes are ISO 8601. Requests **must** include a UTC offset (`Z` or `+02:00`); responses are always UTC with a `Z` suffix.
+- Datetimes are ISO 8601 strings. Requests **must** include a UTC offset (`Z` or `+02:00`); naive strings and numeric Unix timestamps are rejected (422). Responses are always UTC with a `Z` suffix.
 - Event IDs are UUIDs. A malformed ID is a request-shape error (422); a well-formed unknown ID is 404.
 - Emails are trimmed and lowercased before storage and comparison, so `" Alice@Example.COM "` and `alice@example.com` are the same user.
 - Unknown request fields are rejected (422).
@@ -34,7 +34,7 @@ Event deletion is out of scope. `PUT` is a full replacement: every required fiel
 |---|---|---|
 | `title` | string | required, trimmed, 1–200 chars |
 | `description` | string | optional, default `""`, trimmed, ≤ 2000 chars |
-| `starts_at` | datetime | required, timezone-aware, must be in the future |
+| `starts_at` | string (date-time) | required, ISO 8601 with a UTC offset, must be in the future |
 | `max_capacity` | integer | required, strict integer (no `"5"`, `5.5` or `true`), 1–100000 |
 
 ```json

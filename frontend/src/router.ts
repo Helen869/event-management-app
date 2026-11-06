@@ -7,7 +7,7 @@ export type Route =
   | { page: "edit"; id: string }
   | { page: "notFound" };
 
-export function parseRoute(hash: string): Route {
+function parseRoute(hash: string): Route {
   const [root, id, action, ...rest] = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   if (root === undefined) return { page: "list" };
   if (root !== "events" || id === undefined || rest.length > 0) return { page: "notFound" };

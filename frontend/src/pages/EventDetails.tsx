@@ -75,7 +75,7 @@ export function EventDetails({ id }: { id: string }) {
       </div>
 
       {!event.is_past && (
-        <form className="panel register-form" onSubmit={register}>
+        <form className="panel" onSubmit={register}>
           <h2>Register</h2>
           <div className={emailError ? "field field-invalid" : "field"}>
             <label htmlFor="email">Email</label>

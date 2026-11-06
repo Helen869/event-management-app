@@ -151,7 +151,7 @@ def test_unknown_route_uses_uniform_error_body(client):
 def test_unexpected_error_returns_500_without_internal_details():
     class BrokenService:
         def list_events(self):
-            raise RuntimeError("database password is hunter2")
+            raise RuntimeError("internal detail: db-host-17")
 
     client = TestClient(create_app(BrokenService()), raise_server_exceptions=False)
 
@@ -159,4 +159,4 @@ def test_unexpected_error_returns_500_without_internal_details():
 
     assert response.status_code == 500
     assert response.json()["code"] == "INTERNAL_ERROR"
-    assert "hunter2" not in response.text
+    assert "db-host-17" not in response.text

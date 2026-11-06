@@ -1,0 +1,2 @@
+# AI review provider selection; central reviewer currently supports Groq.
+provider: groq

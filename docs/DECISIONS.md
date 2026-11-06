@@ -8,7 +8,7 @@ Short architecture decision records, followed by sequence diagrams, the CI pipel
 - **Decision:** FastAPI with Pydantic for the backend; React + TypeScript (strict) + Vite for the frontend, using the native Fetch API.
 - **Alternatives:** Flask (no built-in validation or OpenAPI); Django REST Framework (heavier, ORM-centric); Next.js (server rendering not needed).
 - **Tradeoffs:** FastAPI gives validation, OpenAPI and Swagger UI for free, with less control over the error format, which we fix with custom handlers. React adds a build step but is widely known.
-- **Consequences:** the OpenAPI document is the API source of truth. Request validation lives in schema declarations, not hand-written code.
+- **Consequences:** the OpenAPI document is the API source of truth. Request validation lives in schema declarations, not hand-written code. With only four screens, the frontend uses a ~30-line hash router instead of `react-router-dom`, and per-page `useState` instead of a state library.
 
 ## ADR-2: Layered architecture
 
@@ -37,7 +37,7 @@ Short architecture decision records, followed by sequence diagrams, the CI pipel
 ## ADR-5: GitHub Actions CI
 
 - **Context:** quality gates must run on every change without secrets or cloud resources.
-- **Decision:** one workflow with parallel backend and frontend jobs, triggered by pushes to `main` and `feature/**` and by pull requests to `main`. The backend runs Ruff, then unit and integration tests as separate steps with JUnit output, then a coverage gate at 80%. Reports are uploaded with `if: always()`.
+- **Decision:** one workflow with parallel backend and frontend jobs, triggered by pushes to `main` and `feature/**` and by pull requests to `main`. The backend runs Ruff, then unit and integration tests as separate steps with JUnit output, then a coverage gate at 80%. Reports are uploaded with `if: always()`. The frontend runs `npm ci`, `tsc --noEmit` and `vite build` on the Node version in `frontend/.nvmrc` (22). Actions are pinned to current major versions (v7, Node 24 runtime).
 - **Alternatives:** a single combined test step (simpler, but the two suites aren't reported separately); a third-party coverage service (needs tokens).
 - **Tradeoffs:** a feature branch with an open PR runs twice (push + PR events).
 - **Consequences:** a merge to `main` is only as safe as branch protection makes it; this workflow reports status but does not enforce merging rules by itself.
@@ -167,7 +167,10 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  T["push: main, feature/**<br/>pull_request: main"] --> B1
+  T["push: main, feature/**<br/>pull_request: main"] --> B1 & F1
+  subgraph Frontend job
+    F1[checkout + Node 22<br/>npm cache] --> F2[npm ci] --> F3[type check<br/>tsc --noEmit] --> F4[build<br/>vite build]
+  end
   subgraph Backend job
     B1[checkout + Python 3.12<br/>pip cache] --> B2[pip install -r requirements-dev.txt]
     B2 --> B3[ruff check]
@@ -178,7 +181,7 @@ flowchart LR
   end
 ```
 
-Any failing step fails the job. The integration and coverage steps run even when unit tests fail, so both suites are always reported.
+The two jobs run in parallel and any failing step fails its job. The integration and coverage steps run even when unit tests fail, so both suites are always reported.
 
 ## Test strategy
 
@@ -217,6 +220,15 @@ test to prove anything. With it, removing the lock reliably fails the test, whic
 - Threshold: 80% line + branch on `backend/app`, enforced in CI by `coverage report --fail-under=80`. Current: 99%.
 - Exclusion: the `EventRepository` protocol body (type declarations, never executed).
 - Not covered: the real `utc_now` clock, which tests replace by design.
+
+### Frontend verification
+
+The frontend has no committed automated tests (optional in scope). CI enforces strict type checking and a production
+build. During development, the UI was exercised in a headless browser against the real backend through the Vite
+proxy, with no mocks. The run covered: empty dashboard, client validation, create (local time arrives as the matching
+UTC), register, double-click sending one request, duplicate and full errors from the API, unregister, edit with a 409
+caused by a change after the form loaded, not-found IDs, a past event with all actions disabled, and no horizontal
+scroll at 375px width.
 
 ### Known limitations
 

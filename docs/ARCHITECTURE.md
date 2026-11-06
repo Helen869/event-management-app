@@ -21,8 +21,10 @@ explainable system where every business rule lives in one place and is covered b
 
 ```mermaid
 flowchart LR
-  subgraph Browser
-    UI[React SPA]
+  subgraph Browser["Browser: React SPA"]
+    Pages[pages/<br/>EventList · EventForm · EventDetails]
+    API[api.ts<br/>typed fetch client]
+    Pages --> API
   end
   subgraph Dev["Dev: Vite dev server :5173"]
     P[/proxy /api → :8000/]
@@ -33,7 +35,7 @@ flowchart LR
     S[Service layer<br/>service.py + injected clock]
     Repo[Repository<br/>repository.py: dicts + threading.Lock]
   end
-  UI -->|fetch /api/*| P --> MW --> R
+  API -->|fetch /api/*| P --> MW --> R
   R -->|domain calls| S
   S -.->|domain exceptions| R
   S --> Repo
@@ -74,6 +76,35 @@ and `is_full` are computed on read and never stored.
 | Repository | `app/repository.py` | `EventRepository` protocol and the in-memory implementation that owns the lock |
 
 The service never raises HTTP errors; routes contain no business rules.
+
+## Frontend
+
+React + TypeScript (strict) + Vite, with no UI framework, router library or state library.
+
+| Module | Responsibility |
+|---|---|
+| `src/api.ts` | The only module that calls `fetch`: typed request/response shapes, relative `/api` URLs, error body → `ApiError` |
+| `src/router.ts` | ~30-line hash router (`#/`, `#/events/new`, `#/events/:id`, `#/events/:id/edit`); back button and deep links work |
+| `src/hooks.ts` | `useLoad` (fetch with loading/error/reload) and `useSubmit` (busy flag + double-submit guard) |
+| `src/notifications.tsx` | Success/error toasts through a small context |
+| `src/dates.ts` | UTC ISO ↔ local `datetime-local` conversion and local display with time zone |
+| `src/pages/*` | Dashboard, create/edit form, event details with attendees |
+
+**State:** each page holds its own `useState` and reloads from the API after every mutation, so the server is the only
+source of truth. There is no global store or cache. Pages are remounted (React `key`) when the event ID changes.
+
+**Business rules in the UI:** status comes from the API (`is_past`, `is_full`, `remaining_seats`), and the UI only
+uses those flags to disable actions and show notices. The form repeats the field rules (required, lengths, capacity
+range, future start, capacity ≥ registrations) for instant feedback; the API's answer is authoritative and its
+`message` and field `details` are shown inline. A 409 caused by a change since the page loaded (e.g. someone took the
+last seat) is shown, and the page reloads.
+
+**Dates:** the API returns UTC; the UI displays it in the browser's time zone (with the zone name). The form's
+`datetime-local` value is local time and is converted with `new Date(value).toISOString()` before sending.
+
+**UX states:** loading text, error panels with retry (or "Event not found"), empty states, disabled buttons with a
+reason (started or full events), "Saving…" on submit, and a ref-based guard so a double click sends only one request.
+`console.error` is used only for unexpected failures (network errors, non-JSON error responses).
 
 ## Validation and rule enforcement
 
@@ -137,7 +168,7 @@ The request line for `DELETE …/registrations/{email}` contains the email (see 
 
 The frontend only calls relative paths under `/api`, so it never needs to know the backend's address.
 
-- **Development:** the Vite dev server proxies `/api` to `http://localhost:8000`. Browser and API look same-origin, so the backend configures **no CORS**.
+- **Development:** the Vite dev server (`frontend/vite.config.ts`) proxies `/api` to `http://localhost:8000`; `vite preview` reuses the same proxy. Browser and API look same-origin, so the backend configures **no CORS**.
 - **Production (not built):** a reverse proxy or gateway (e.g. Nginx, CloudFront) serves the built frontend and routes `/api/*` to the backend under the same origin. CORS stays unnecessary.
 
 ## Assumptions

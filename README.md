@@ -30,12 +30,17 @@ exceptions; one handler maps them to 404/409/422. Details: [docs/ARCHITECTURE.md
 
 ## Quick start
 
-Requires Python 3.12.
+### Prerequisites
+
+- **Python 3.12+** is required. On Windows, where several versions may be installed side by side, `py -3.12 -m venv .venv` selects 3.12 explicitly. Plain `python` may point to an older version.
+
+### Backend
 
 **PowerShell (Windows)**
 ```powershell
 cd backend
 py -3.12 -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned   # allows Activate.ps1 in this session only
 .\.venv\Scripts\Activate.ps1
 python --version            # should print Python 3.12.x
 pip install -r requirements-dev.txt
@@ -47,6 +52,7 @@ uvicorn app.main:app --reload
 cd backend
 python3.12 -m venv .venv
 source .venv/bin/activate   # Git Bash on Windows: source .venv/Scripts/activate
+python --version            # should print Python 3.12.x
 pip install -r requirements-dev.txt
 uvicorn app.main:app --reload
 ```
@@ -74,7 +80,7 @@ All commands run from `backend/` with the virtual environment activated. They ar
 
 | Symptom | Fix |
 |---|---|
-| `Activate.ps1 cannot be loaded because running scripts is disabled` | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or run tools without activating: `.\.venv\Scripts\python -m pytest` |
+| `Activate.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` in that window, or run tools without activating: `.\.venv\Scripts\python -m pytest` |
 | `python --version` shows 3.10 or 3.11 inside the venv | Delete `.venv` and recreate it with `py -3.12 -m venv .venv` (Windows) or `python3.12 -m venv .venv` |
 | `ModuleNotFoundError: No module named 'app'` | Run commands from `backend/`, not the repo root |
 | `[Errno 10048]` / address already in use | Another process uses port 8000: stop it, or run `uvicorn app.main:app --reload --port 8001` |
@@ -105,7 +111,7 @@ Coverage exclusions: the repository `Protocol` declaration only.
 ## Assumptions and limitations
 
 - A user is identified by email (trimmed, lowercased); there is no authentication or authorization.
-- An event has one timezone-aware start time stored in UTC; it counts as started when `start <= now`.
+- Events have only a start time (timezone-aware, stored in UTC). An event counts as past from the moment it starts (`start <= now`), and that moment is also the registration cutoff. A real system would add an end time and a separate registration deadline.
 - Data is in memory and process-local: lost on restart, and not shared across workers. Run a single Uvicorn worker.
 - Cancelling puts the email in the URL, so it appears in logs.
 - No event deletion and no pagination.

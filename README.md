@@ -68,7 +68,8 @@ The API runs at http://localhost:8000. Swagger UI: http://localhost:8000/docs.
 **PowerShell (Windows)**
 ```powershell
 cd frontend
-npm ci
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned   # npm.ps1 is blocked by default; this session only
+npm ci                      # installs the exact versions in package-lock.json
 npm run dev
 ```
 
@@ -106,7 +107,7 @@ They are the same in PowerShell and Bash.
 
 | Symptom | Fix |
 |---|---|
-| `Activate.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` in that window, or run tools without activating: `.\.venv\Scripts\python -m pytest` |
+| `Activate.ps1` or `npm.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` in that window, or run tools without activating: `.\.venv\Scripts\python -m pytest` |
 | `python --version` shows 3.10 or 3.11 inside the venv | Delete `.venv` and recreate it with `py -3.12 -m venv .venv` (Windows) or `python3.12 -m venv .venv` |
 | `ModuleNotFoundError: No module named 'app'` | Run backend commands from `backend/`, not the repo root |
 | `[Errno 10048]` / address already in use | Another process uses port 8000: stop it. The frontend proxy expects the API on 8000. |

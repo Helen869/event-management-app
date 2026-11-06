@@ -28,8 +28,46 @@ and edit events; users register and unregister by email. Capacity, duplicates an
 
 ## Architecture
 
-`React SPA → /api (Vite proxy in dev) → FastAPI routes → EventService (all business rules) → InMemoryRepository (storage + lock)`.
-The service raises domain exceptions; one handler maps them to 404/409/422. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+```mermaid
+flowchart TB
+  FE["React frontend<br/>Pages, forms, notifications"]
+  API["FastAPI routes<br/>Validation, status codes, errors"]
+  SVC["Service layer<br/>All business rules live here"]
+  REPO["In-memory repository<br/>Dictionaries plus one lock"]
+  FE -->|"relative /api, Vite proxy in dev"| API
+  API --> SVC
+  SVC --> REPO
+  classDef fe fill:#EEEDFE,stroke:#534AB7,color:#3C3489
+  classDef api fill:#E1F5EE,stroke:#0F6E56,color:#085041
+  classDef svc fill:#FAECE7,stroke:#993C1D,color:#712B13
+  classDef repo fill:#F1EFE8,stroke:#5F5E5A,color:#444441
+  class FE fe
+  class API api
+  class SVC svc
+  class REPO repo
+```
+
+*Layers: the service raises domain exceptions and one API handler maps them to 404/409/422.*
+
+```mermaid
+flowchart TB
+  C1{"Event not found?"} -->|yes| R1["404 EVENT_NOT_FOUND"]
+  C1 -->|no| C2{"Event already started?"}
+  C2 -->|yes| R2["409 EVENT_IN_PAST"]
+  C2 -->|no| C3{"Email already registered?"}
+  C3 -->|yes| R3["409 ALREADY_REGISTERED"]
+  C3 -->|no| C4{"No seats left?"}
+  C4 -->|yes| R4["409 EVENT_FULL"]
+  C4 -->|no| OK["Add registration<br/>201 Created"]
+  classDef bad fill:#FAECE7,stroke:#993C1D,color:#712B13
+  classDef good fill:#E1F5EE,stroke:#0F6E56,color:#085041
+  class R1,R2,R3,R4 bad
+  class OK good
+```
+
+*Registration: after request validation (422), these checks run in this order inside one lock, so the capacity check and the insert are atomic.*
+
+Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Quick start
 

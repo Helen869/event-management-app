@@ -20,26 +20,25 @@ explainable system where every business rule lives in one place and is covered b
 ## Components
 
 ```mermaid
-flowchart LR
-  subgraph Browser["Browser: React SPA"]
-    Pages[pages/<br/>EventList · EventForm · EventDetails]
-    API[api.ts<br/>typed fetch client]
-    Pages --> API
-  end
-  subgraph Dev["Dev: Vite dev server :5173"]
-    P[/proxy /api → :8000/]
-  end
-  subgraph Backend["FastAPI app :8000 (single process)"]
-    MW[Request logging middleware]
-    R[API layer<br/>routes.py · schemas.py · errors.py]
-    S[Service layer<br/>service.py + injected clock]
-    Repo[Repository<br/>repository.py: dicts + threading.Lock]
-  end
-  API -->|fetch /api/*| P --> MW --> R
-  R -->|domain calls| S
-  S -.->|domain exceptions| R
-  S --> Repo
+flowchart TB
+  FE["React frontend<br/>Pages, forms, notifications"]
+  API["FastAPI routes<br/>Validation, status codes, errors"]
+  SVC["Service layer<br/>All business rules live here"]
+  REPO["In-memory repository<br/>Dictionaries plus one lock"]
+  FE -->|"relative /api, Vite proxy in dev"| API
+  API --> SVC
+  SVC --> REPO
+  classDef fe fill:#EEEDFE,stroke:#534AB7,color:#3C3489
+  classDef api fill:#E1F5EE,stroke:#0F6E56,color:#085041
+  classDef svc fill:#FAECE7,stroke:#993C1D,color:#712B13
+  classDef repo fill:#F1EFE8,stroke:#5F5E5A,color:#444441
+  class FE fe
+  class API api
+  class SVC svc
+  class REPO repo
 ```
+
+The backend runs as a single process. Modules per layer are listed under [Layer responsibilities](#layer-responsibilities); request logging is described under [Logging](#logging).
 
 ## Data model
 

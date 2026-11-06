@@ -150,6 +150,10 @@ Coverage exclusions: the repository `Protocol` declaration only.
 - No event deletion and no pagination. A page's Past/Full status is as of its last load (it refreshes after every action).
 - Production would serve the frontend and API under one origin through a reverse proxy; no deployment is included.
 
+## Notes
+
+Built with AI assistance (Claude Code). Design decisions, business rules and verification were reviewed and owned by the author.
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md): layers, frontend design, data model, concurrency, error policy, networking, production evolution

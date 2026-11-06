@@ -40,7 +40,7 @@ Short architecture decision records, followed by sequence diagrams, the CI pipel
 - **Decision:** one workflow with parallel backend and frontend jobs, triggered by pushes to `main` and `feature/**` and by pull requests to `main`. The backend runs Ruff, then unit and integration tests as separate steps with JUnit output, then a coverage gate at 80%. Reports are uploaded with `if: always()`. The frontend runs `npm ci`, `tsc --noEmit` and `vite build` on the Node version in `frontend/.nvmrc` (22). Actions are pinned to current major versions (v7, Node 24 runtime).
 - **Alternatives:** a single combined test step (simpler, but the two suites aren't reported separately); a third-party coverage service (needs tokens).
 - **Tradeoffs:** a feature branch with an open PR runs twice (push + PR events).
-- **Consequences:** a merge to `main` is only as safe as branch protection makes it; this workflow reports status but does not enforce merging rules by itself.
+- **Consequences:** the workflow only reports status; a ruleset on `main` enforces it. It requires a pull request and both jobs as status checks on a branch up to date with `main`, and blocks direct and force pushes. Approvals are 0 (single contributor) and, as configured by the owner, nobody can bypass it.
 
 ## ADR-6: Email as identity and status code policy
 

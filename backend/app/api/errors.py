@@ -33,11 +33,15 @@ async def handle_domain_error(request: Request, exc: errors.DomainError) -> JSON
     return _error(status, code, exc.message)
 
 
+def _field_name(err: dict) -> str:
+    # Malformed JSON reports a character offset as its location; a non-object body has none.
+    if err["type"] == "json_invalid":
+        return "body"
+    return ".".join(str(part) for part in err["loc"][1:]) or "body"
+
+
 async def handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
-    details = [
-        FieldError(field=".".join(str(part) for part in err["loc"][1:]), message=err["msg"])
-        for err in exc.errors()
-    ]
+    details = [FieldError(field=_field_name(err), message=err["msg"]) for err in exc.errors()]
     return _error(422, "VALIDATION_ERROR", "Some fields are missing or invalid.", details)
 
 

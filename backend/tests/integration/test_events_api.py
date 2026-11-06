@@ -86,6 +86,16 @@ def test_missing_required_fields_are_listed(client):
     assert fields == {"title", "starts_at", "max_capacity"}
 
 
+@pytest.mark.parametrize("content", [b"{not json", b"[1, 2]"])
+def test_malformed_body_is_reported_against_the_body_field(client, content):
+    response = client.post(
+        "/api/events", content=content, headers={"Content-Type": "application/json"}
+    )
+
+    assert response.status_code == 422
+    assert [d["field"] for d in response.json()["details"]] == ["body"]
+
+
 def test_start_time_must_be_an_iso_string_not_a_unix_timestamp(client):
     response = client.post("/api/events", json=EVENT | {"starts_at": 1801000000})
 

@@ -50,6 +50,14 @@ Short architecture decision records, followed by sequence diagrams, the CI pipel
 - **Tradeoffs:** anyone who knows an email can cancel that registration. The email appears in DELETE URLs and therefore in logs.
 - **Consequences:** clients can branch on the `code` field. The future fix for privacy is a registration ID in the URL.
 
+## ADR-7: Event deletion is not implemented
+
+- **Context:** the requirements list create, read and update for events, but also mention standard CRUD endpoints, so deletion is ambiguous.
+- **Decision:** no `DELETE /api/events/{id}`; scope is kept to the explicitly listed operations. This is a scope decision, not a technical limitation: an unauthenticated delete that removes the event and cascades its registrations would be simple.
+- **Alternatives:** a cascading hard delete; cancelling via an event status instead of deleting.
+- **Tradeoffs:** the standard CRUD expectation is only partly met, and a reviewer may expect `DELETE`. In a real system, deleting an event with attendees raises business questions: notifying attendees, auditability, and whether a `CANCELLED` status is better than hard deletion.
+- **Consequences:** if requested, a cascading `DELETE` is a small change (service, repository, tests). The fuller direction is an event status (`SCHEDULED`, `CANCELLED`, `COMPLETED`) with a cancellation flow, authorization and notifications.
+
 ## Sequence diagrams
 
 ### Create event

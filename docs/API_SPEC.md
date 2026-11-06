@@ -24,7 +24,7 @@ This page summarizes it and adds the business constraints that OpenAPI cannot ex
 | POST | `/api/events/{event_id}/registrations` | 201 `RegistrationResponse` | 404, 409, 422 |
 | DELETE | `/api/events/{event_id}/registrations/{email}` | 204, empty body | 404, 409, 422 |
 
-Event deletion is out of scope. `PUT` is a full replacement: every required field must be sent.
+There is no `DELETE /api/events/{event_id}`: event deletion is not implemented (scope decision, see [ADR-7](DECISIONS.md#adr-7-event-deletion-is-not-implemented)). `PUT` is a full replacement: every required field must be sent.
 
 ## Schemas
 

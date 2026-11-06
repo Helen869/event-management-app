@@ -8,7 +8,7 @@ explainable system where every business rule lives in one place and is covered b
 ## Requirements
 
 **Functional**
-- Events: create, list, get, update (title, description, start date/time, max capacity). No deletion.
+- Events: create, list, get, update (title, description, start date/time, max capacity). Deletion is not implemented ([ADR-7](DECISIONS.md#adr-7-event-deletion-is-not-implemented)).
 - Registrations: register an email, cancel a registration, list an event's registrations.
 - Rules: no registration for started events; never exceed capacity; no duplicate registration per email.
 

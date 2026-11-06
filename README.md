@@ -7,7 +7,7 @@ and edit events; users register and unregister by email. Capacity, duplicates an
 
 ## Features
 
-- Create, list, view and update events (title, description, start date/time, max capacity). Event deletion is out of scope.
+- Create, list, view and update events (title, description, start date/time, max capacity). Event deletion is not implemented ([ADR-7](docs/DECISIONS.md#adr-7-event-deletion-is-not-implemented)).
 - Register an email for an event, unregister it, list an event's registrations.
 - Business rules: no registration for started events, never exceed capacity (including concurrent requests), one
   registration per email per event (case- and whitespace-insensitive), capacity can't drop below current registrations,
@@ -216,7 +216,7 @@ Coverage exclusions: the repository `Protocol` declaration only.
 - The UI shows times in the browser's local time zone and sends UTC to the API.
 - Data is in memory and process-local: lost on restart, and not shared across workers. Run a single Uvicorn worker.
 - Cancelling puts the email in the URL, so it appears in logs.
-- No event deletion and no pagination. A page's Past/Full status is as of its last load (it refreshes after every action).
+- Event deletion is not implemented: a scope decision, see [ADR-7](docs/DECISIONS.md#adr-7-event-deletion-is-not-implemented). No pagination. A page's Past/Full status is as of its last load (it refreshes after every action).
 - Production would serve the frontend and API under one origin through a reverse proxy; no deployment is included.
 
 ## Notes

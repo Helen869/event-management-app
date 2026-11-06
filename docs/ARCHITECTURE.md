@@ -66,13 +66,15 @@ and `is_full` are computed on read and never stored.
 
 | Layer | Module | Responsibility |
 |---|---|---|
-| App wiring | `app/main.py` | `create_app()` builds the app with a service (tests inject their own), registers routes, handlers and logging middleware |
-| API | `app/api/routes.py` | HTTP endpoints: parse input, call the service, shape responses |
-| API | `app/api/schemas.py` | Request/response Pydantic models, separate from domain models |
-| API | `app/api/errors.py` | Maps domain exceptions to status codes and a uniform error body |
-| Service | `app/service.py` | All business rules, email normalization, time checks via the injected clock |
-| Domain | `app/domain/models.py`, `errors.py` | Immutable dataclasses and domain exceptions; no HTTP knowledge |
-| Repository | `app/repository.py` | `EventRepository` protocol and the in-memory implementation that owns the lock |
+| App wiring | `backend/app/main.py` | `create_app()` builds the app with a service (tests inject their own) and registers routes and error handlers |
+| App wiring | `backend/app/main.py` (`log_requests`) | Request logging middleware: one line per request with method, path, status, duration |
+| API | `backend/app/api/routes.py` | HTTP endpoints: parse input, call the service, shape responses |
+| API | `backend/app/api/schemas.py` | Request/response Pydantic models, separate from domain models |
+| API | `backend/app/api/errors.py` | Domain exception → HTTP mapping: status codes, error codes and the uniform error body |
+| Service | `backend/app/service.py` | All business rules, email normalization, time checks via the injected clock |
+| Domain | `backend/app/domain/models.py` | Immutable dataclasses (`Event`, `Registration`, `EventSummary`); no HTTP knowledge |
+| Domain | `backend/app/domain/errors.py` | Domain exceptions raised by the service |
+| Repository | `backend/app/repository.py` | `EventRepository` protocol and the in-memory implementation that owns the lock |
 
 The service never raises HTTP errors; routes contain no business rules.
 
@@ -82,12 +84,17 @@ React + TypeScript (strict) + Vite, with no UI framework, router library or stat
 
 | Module | Responsibility |
 |---|---|
-| `src/api.ts` | The only module that calls `fetch`: typed request/response shapes, relative `/api` URLs, error body → `ApiError` |
-| `src/router.ts` | ~30-line hash router (`#/`, `#/events/new`, `#/events/:id`, `#/events/:id/edit`); back button and deep links work |
-| `src/hooks.ts` | `useLoad` (fetch with loading/error/reload) and `useSubmit` (busy flag + double-submit guard) |
-| `src/notifications.tsx` | Success/error toasts through a small context |
-| `src/dates.ts` | UTC ISO ↔ local `datetime-local` conversion and local display with time zone |
-| `src/pages/*` | Dashboard, create/edit form, event details with attendees |
+| `frontend/src/main.tsx`, `App.tsx` | Bootstrap, notification provider, page switch per route |
+| `frontend/src/api.ts` | The only module that calls `fetch`: typed request/response shapes, relative `/api` URLs, error body → `ApiError` |
+| `frontend/src/router.ts` | ~30-line hash router (`#/`, `#/events/new`, `#/events/:id`, `#/events/:id/edit`); back button and deep links work |
+| `frontend/src/hooks.ts` | `useLoad` (fetch with loading/error/reload) and `useSubmit` (busy flag + double-submit guard) |
+| `frontend/src/components.tsx` | Shared UI pieces: status badges, loading and error panels, accessible field errors |
+| `frontend/src/notifications.tsx` | Success/error toasts through a small context |
+| `frontend/src/dates.ts` | UTC ISO ↔ local `datetime-local` conversion and local display with time zone |
+| `frontend/src/text.ts` | Singular/plural wording for counts |
+| `frontend/src/pages/` | `EventList` (dashboard), `EventForm` (create/edit), `EventDetails` (attendees, register, unregister) |
+| `frontend/src/styles.css` | Plain responsive CSS |
+| `frontend/vite.config.ts` | Dev server with the `/api` proxy to `:8000` |
 
 **State:** each page holds its own `useState` and reloads from the API after every mutation, so the server is the only
 source of truth. There is no global store or cache. Pages are remounted (React `key`) when the event ID changes.

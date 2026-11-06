@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { api, toApiError, type ApiError, type EventResponse } from "../api";
-import { LoadError, Loading } from "../components";
+import { errorProps, FieldErrorText, LoadError, Loading } from "../components";
 import { localInputToUtc, toLocalInput } from "../dates";
 import { useLoad, useSubmit } from "../hooks";
 import { useNotify } from "../notifications";
@@ -107,14 +107,28 @@ export function EventForm({ event }: { event?: EventResponse }) {
       <h1>{event ? "Edit event" : "New event"}</h1>
       {errors.form && <p className="form-error" role="alert">{errors.form}</p>}
       <Field label="Title" error={errors.title} id="title">
-        <input id="title" value={values.title} onChange={set("title")} maxLength={200} required />
+        <input
+          id="title"
+          value={values.title}
+          onChange={set("title")}
+          maxLength={200}
+          required
+          {...errorProps("title", errors.title)}
+        />
       </Field>
       <Field label="Description (optional)" error={errors.description} id="description">
-        <textarea id="description" value={values.description} onChange={set("description")} rows={4} />
+        <textarea
+          id="description"
+          value={values.description}
+          onChange={set("description")}
+          rows={4}
+          {...errorProps("description", errors.description)}
+        />
       </Field>
       <Field label="Starts at (your local time)" error={errors.startsAt} id="startsAt">
         <input
           id="startsAt"
+          {...errorProps("startsAt", errors.startsAt)}
           type="datetime-local"
           value={values.startsAt}
           min={toLocalInput(new Date())}
@@ -125,6 +139,7 @@ export function EventForm({ event }: { event?: EventResponse }) {
       <Field label="Max capacity" error={errors.maxCapacity} id="maxCapacity">
         <input
           id="maxCapacity"
+          {...errorProps("maxCapacity", errors.maxCapacity)}
           type="number"
           inputMode="numeric"
           min={Math.max(1, event?.registered_count ?? 0)}
@@ -156,7 +171,7 @@ function Field({ label, error, id, children }: { label: string; error?: string; 
     <div className={error ? "field field-invalid" : "field"}>
       <label htmlFor={id}>{label}</label>
       {children}
-      {error && <p className="field-error">{error}</p>}
+      <FieldErrorText inputId={id} error={error} />
     </div>
   );
 }

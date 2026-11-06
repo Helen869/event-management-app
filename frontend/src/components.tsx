@@ -6,6 +6,15 @@ export function EventBadges({ event }: { event: EventResponse }) {
   return <span className="badge badge-open">Open</span>;
 }
 
+// Ties an input to its error message so screen readers announce it.
+export function errorProps(inputId: string, error?: string) {
+  return error ? { "aria-invalid": true, "aria-describedby": `${inputId}-error` } : {};
+}
+
+export function FieldErrorText({ inputId, error }: { inputId: string; error?: string }) {
+  return error ? <p className="field-error" id={`${inputId}-error`}>{error}</p> : null;
+}
+
 export function Loading({ what }: { what: string }) {
   return <p className="muted" role="status">Loading {what}…</p>;
 }

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { api, toApiError } from "../api";
-import { EventBadges, LoadError, Loading } from "../components";
+import { errorProps, EventBadges, FieldErrorText, LoadError, Loading } from "../components";
 import { formatDateTime } from "../dates";
 import { useLoad, useSubmit } from "../hooks";
 import { useNotify } from "../notifications";
@@ -88,12 +88,13 @@ export function EventDetails({ id }: { id: string }) {
                 placeholder="name@example.com"
                 disabled={event.is_full}
                 required
+                {...errorProps("email", emailError)}
               />
               <button className="button button-primary" type="submit" disabled={busy || event.is_full}>
                 {busy ? "Working…" : "Register"}
               </button>
             </div>
-            {emailError && <p className="field-error">{emailError}</p>}
+            <FieldErrorText inputId="email" error={emailError} />
           </div>
         </form>
       )}

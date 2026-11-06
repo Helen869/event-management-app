@@ -5,6 +5,7 @@ import { localInputToUtc, toLocalInput } from "../dates";
 import { useLoad, useSubmit } from "../hooks";
 import { useNotify } from "../notifications";
 import { navigate } from "../router";
+import { plural } from "../text";
 
 const MAX_CAPACITY = 100_000;
 
@@ -31,6 +32,7 @@ function validate(values: Values, registeredCount: number): Errors {
   if (!values.maxCapacity || !Number.isInteger(capacity) || capacity < 1 || capacity > MAX_CAPACITY) {
     errors.maxCapacity = `Max capacity must be a whole number from 1 to ${MAX_CAPACITY}.`;
   } else if (capacity < registeredCount) {
+    // Reached only when 1 <= capacity < registeredCount, so the count is always plural.
     errors.maxCapacity = `Max capacity can't be lower than the ${registeredCount} current registrations.`;
   }
   return errors;
@@ -134,7 +136,10 @@ export function EventForm({ event }: { event?: EventResponse }) {
         />
       </Field>
       {event && event.registered_count > 0 && (
-        <p className="muted">{event.registered_count} people are registered; capacity can't go below that.</p>
+        <p className="muted">
+          {event.registered_count} {plural(event.registered_count, "person", "people")} registered; capacity can't
+          go below {event.registered_count}.
+        </p>
       )}
       <div className="actions">
         <button className="button button-primary" type="submit" disabled={busy}>

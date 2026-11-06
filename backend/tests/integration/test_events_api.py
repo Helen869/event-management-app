@@ -136,6 +136,9 @@ def test_reducing_capacity_below_registrations_returns_409(client):
 
     assert response.status_code == 409
     assert response.json()["code"] == "CAPACITY_BELOW_REGISTRATIONS"
+    assert response.json()["message"] == (
+        "Max capacity cannot be lower than the current 2 registrations."
+    )
 
 
 def test_unknown_route_uses_uniform_error_body(client):

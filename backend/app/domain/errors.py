@@ -28,8 +28,9 @@ class AlreadyRegisteredError(DomainError):
 
 class CapacityBelowRegistrationsError(DomainError):
     def __init__(self, registered_count: int) -> None:
+        # Always plural: this only fires when 1 <= max_capacity < registered_count.
         super().__init__(
-            f"Max capacity cannot be lower than the current {registered_count} registration(s)."
+            f"Max capacity cannot be lower than the current {registered_count} registrations."
         )
 
 

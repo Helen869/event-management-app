@@ -2,6 +2,7 @@ import { api, type EventResponse } from "../api";
 import { EventBadges, LoadError, Loading } from "../components";
 import { formatDateTime } from "../dates";
 import { useLoad } from "../hooks";
+import { plural } from "../text";
 
 export function EventList() {
   const { data: events, error, loading, reload } = useLoad(api.listEvents);
@@ -48,7 +49,7 @@ function EventSection({ title, events, empty }: { title: string; events: EventRe
               <p className="muted">{formatDateTime(event.starts_at)}</p>
               <p>
                 {event.registered_count} / {event.max_capacity} registered ·{" "}
-                <strong>{event.remaining_seats}</strong> seats left
+                <strong>{event.remaining_seats}</strong> {plural(event.remaining_seats, "seat")} left
               </p>
               <div className="actions">
                 <a className="button" href={`#/events/${event.id}`}>View</a>

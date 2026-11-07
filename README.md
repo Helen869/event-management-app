@@ -228,3 +228,5 @@ Built with AI assistance (Claude Code). Design decisions, business rules and ver
 - [Architecture](docs/ARCHITECTURE.md): layers, frontend design, data model, concurrency, error policy, networking, production evolution
 - [API specification](docs/API_SPEC.md): endpoints, schemas, error codes, rule evaluation order
 - [Decisions](docs/DECISIONS.md): ADRs, sequence diagrams, CI pipeline, test strategy
+
+<!-- Test: shared AI review workflow integration -->

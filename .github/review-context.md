@@ -1,6 +1,8 @@
 # AI review context — Event Management App
 
-This is a time-boxed Origin Senior Architect take-home exercise: a FastAPI/Pydantic backend, React/TypeScript frontend, and an in-memory repository. The AI PR reviewer is advisory, **not** a substitute for Ruff, Pytest, API integration tests, type checking or human approval.
+This is a lightweight full-stack Event Management application demonstrating REST API design, business-rule enforcement, concurrency handling, automated testing, and reusable AI-assisted code review. The application uses FastAPI/Pydantic, React/TypeScript, and an in-memory repository.
+
+The AI PR reviewer is advisory, **not** a substitute for Ruff, Pytest, API integration tests, type checking or human approval.
 
 ## Important business invariants
 
@@ -15,7 +17,7 @@ This is a time-boxed Origin Senior Architect take-home exercise: a FastAPI/Pydan
 
 ## Deliberate MVP scope decisions
 
-- **Event deletion is deferred, not accidentally omitted.** The assessment says "standard CRUD", so this is a documented partial-coverage tradeoff. Before enabling deletion, clarify whether a user is cancelling or purging an event, who is allowed to do it, how attendees are notified, and whether historical records must be retained. This does not authorize ignoring bugs in existing event functions.
+- **Event deletion is deferred, not accidentally omitted.** Standard CRUD would include deletion, so this is a documented partial-coverage tradeoff (ADR-7 in `docs/DECISIONS.md`). Before enabling deletion, clarify whether a user is cancelling or purging an event, who is allowed to do it, how attendees are notified, and whether historical records must be retained. This does not authorize ignoring bugs in existing event functions.
 - No persistent database, authentication, notification service, cloud infrastructure, or frontend E2E tests.
 - One Uvicorn process/worker; the lock does not protect across multiple processes.
 - An email is used as a simple identity; unregister path currently includes the email, with a documented privacy limitation.

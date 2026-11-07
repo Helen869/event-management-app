@@ -58,6 +58,14 @@ Short architecture decision records, followed by sequence diagrams, the CI pipel
 - **Tradeoffs:** the standard CRUD expectation is only partly met, and a reviewer may expect `DELETE`. In a real system, deleting an event with attendees raises business questions: notifying attendees, auditability, and whether a `CANCELLED` status is better than hard deletion.
 - **Consequences:** if requested, a cascading `DELETE` is a small change (service, repository, tests). The fuller direction is an event status (`SCHEDULED`, `CANCELLED`, `COMPLETED`) with a cancellation flow, authorization and notifications.
 
+## ADR-8: Same-origin API access without CORS
+
+- **Context:** in local development the React frontend (Vite, port 5173) and the FastAPI backend (port 8000) run on different origins. Direct browser requests between them would need CORS configuration. CORS is a browser-enforced rule for cross-origin access, not an authentication or authorization control: it does not protect the API from non-browser clients.
+- **Decision:** the frontend uses only relative `/api` URLs (`frontend/src/api.ts`), and Vite's dev proxy forwards them to FastAPI (`frontend/vite.config.ts`; `vite preview` reuses it). The backend intentionally does not enable `CORSMiddleware`.
+- **Alternatives:** enable FastAPI `CORSMiddleware` with an explicit allowlist of frontend origins, allowing direct cross-origin API requests.
+- **Tradeoffs:** the setup depends on a development proxy or a same-origin reverse proxy. Separately hosted frontend and backend deployments would need additional configuration.
+- **Consequences:** no CORS configuration is needed for the current architecture. A future production deployment should expose the frontend and API through the same origin (see [ARCHITECTURE.md](ARCHITECTURE.md#dev-and-production-networking)). If cross-origin browser access is required, use an explicit origin allowlist rather than unrestricted CORS.
+
 ## Sequence diagrams
 
 ### Create event
